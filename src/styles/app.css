@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+    /* Game palette — these become Tailwind utilities (bg-primary,
+       text-primary, bg-surface, text-coin, ...). The canvas-side palette
+       lives in src/game/config.ts — keep the two in harmony. */
+    --color-primary: #fbbf24;
+    --color-secondary: #38bdf8;
+    --color-tertiary: #c084fc;
+    --color-surface: #10182b;
+    --color-coin: #fbbf24;
+}
+
+/* ---------------------------------------------------------------------------
+   Viewport + device frame — the pattern production RUN games use. The app is a
+   centered portrait column: full-width on phones, letterboxed 9:16 on
+   desktop/landscape, page scroll and zoom fully locked.
+--------------------------------------------------------------------------- */
+
+:root {
+    --game-w: 100vw;
+    /* The RUN host already pads below its native header, so we deliberately
+       do NOT use env(safe-area-inset-top) — it double-pads on Android.
+       Consume via the pt-safe-top utility below. */
+    --safe-top: 0px;
+}
+
+@media (orientation: landscape) {
+    /* ADAPT: 9/16 assumes a portrait game (game.config orientation:
+       "portrait"). For a landscape game, drop this override and set
+       "orientation": "landscape" in game.config.prod.json instead. */
+    :root {
+        --game-w: min(100vw, calc(100dvh * 9 / 16));
+    }
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: #000; /* letterbox bars */
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+    position: fixed;
+    inset: 0;
+}
+
+/* The device frame every screen renders inside (see ui/App.jsx). */
+#app-frame {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--game-w);
+    overflow: hidden;
+}
+
+/* Shop skin previews: the run-cycle bob (hop + landing squash), mirroring the
+   in-game squash & stretch. Every preview uses the same keyframes, duration,
+   and start time (all rows mount in one commit), so the whole shop bounces in
+   sync. transform-origin bottom = squash from the feet, like the game. */
+@keyframes skin-bob {
+    0%   { transform: translateY(0) scale(1, 1); }
+    18%  { transform: translateY(-2%) scale(0.94, 1.08); }
+    45%  { transform: translateY(-16%) scale(0.98, 1.02); }
+    70%  { transform: translateY(0) scale(1.1, 0.88); }
+    85%  { transform: translateY(0) scale(0.98, 1.03); }
+    100% { transform: translateY(0) scale(1, 1); }
+}
+.skin-bob {
+    animation: skin-bob 0.65s ease-in-out infinite;
+    transform-origin: 50% 100%;
+}
+
+/* Safe-area utilities. Bottom uses the real env inset (home indicator);
+   top uses --safe-top per the note above. */
+@utility pt-safe-top {
+    padding-top: calc(0.5rem + var(--safe-top));
+}
+@utility pb-safe-bottom {
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+}

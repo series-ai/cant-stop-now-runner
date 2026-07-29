@@ -1,0 +1,25 @@
+{
+    "minDurationSec": 1,
+    "maxDurationSec": 3600,
+    "minScore": 1,
+    "maxScore": 100000,
+    "requiresToken": false,
+    "enableScoreSealing": false,
+    "modes": {
+        "default": { "displayName": "Default" }
+    },
+    "periods": {
+        "alltime": { "displayName": "All Time", "type": "alltime" }
+    },
+    "antiCheat": {
+        "enableZScoreDetection": true,
+        "zScoreThreshold": 4,
+        "enableRateLimit": true,
+        "minTimeBetweenSubmissionsSec": 5,
+        "trustScoreDecayPerFlag": 0.1,
+        "shadowBanThreshold": 0.3
+    },
+    "displaySettings": {
+        "maxEntriesPerPage": 50
+    }
+}
