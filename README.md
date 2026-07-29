@@ -62,7 +62,3 @@ src/sdk/leaderboard.ts    // all-time board (submit + podium fetch)
 src/systems/, src/shared/ // copy-in platform systems (ads, trusted clock)
 src/ui/                   // menu, shop, settings, HUD, game over
 ```
-
-## Where This Template Is Developed
-
-This template lives in the Can't Stop Now Jam Kit monorepo and is published to [series-ai/cant-stop-now-runner](https://github.com/series-ai/cant-stop-now-runner) as a standalone read-only mirror (one-way sync: changes land in the jam kit and get pushed here, so don't commit to or open PRs against the mirror).
