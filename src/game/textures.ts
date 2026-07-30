@@ -15,7 +15,7 @@
  * scaled down by the sprites that use them, so edges stay crisp at high
  * DPR. Author real art at 2x too (see CLAUDE.md).
  */
-import { Assets, Graphics, Texture, type Renderer } from 'pixi.js';
+import { Assets, Graphics, Rectangle, Texture, type Renderer } from 'pixi.js';
 import { CONFIG } from './config.ts';
 import { SKINS, type Skin } from './skins.ts';
 
@@ -183,6 +183,40 @@ export function makeCoinTexture(renderer: Renderer): Texture {
             g.circle(r - r * 0.28, r - r * 0.28, r * 0.24).fill(C.coinShine);
         });
     });
+}
+
+/**
+ * Frame origins of the 10-frame coin spin, in sheet pixels — copied from
+ * resources/coin.json (256px cells, coin01..coin10). Baked in because Pixi
+ * force-parses any Assets-loaded .json with a 'frames' key as a spritesheet,
+ * so the json file itself must never go through the loader.
+ */
+const COIN_SHEET_FRAMES: [number, number][] = [
+    [0, 0], [256, 0], [512, 0], [768, 0],
+    [0, 256], [256, 256], [512, 256], [768, 256],
+    [0, 512], [256, 512],
+];
+
+/**
+ * Animated coin: slices the spin sheet loaded under 'coin-sheet' into one
+ * texture per frame. Falls back to the single static coin ('coin' alias or
+ * the procedural placeholder) when the sheet isn't loaded.
+ */
+export function makeCoinTextures(renderer: Renderer): Texture[] {
+    if (Assets.cache.has('coin-sheet')) {
+        const sheet = Assets.get<Texture>('coin-sheet');
+        // Inset each 256px cell to the 160px box around the coin — the sheet
+        // leaves wide transparent margins that would render the coin tiny.
+        // Measured union of all 10 frames' content: x 55-201, y 42-202.
+        const INSET_X = 48;
+        const INSET_Y = 42;
+        const BOX = 160;
+        return COIN_SHEET_FRAMES.map(([x, y]) => new Texture({
+            source: sheet.source,
+            frame: new Rectangle(x + INSET_X, y + INSET_Y, BOX, BOX),
+        }));
+    }
+    return [makeCoinTexture(renderer)];
 }
 
 /** Soft cloud blob. Alias: 'cloud'. */

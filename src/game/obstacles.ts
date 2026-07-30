@@ -10,7 +10,7 @@
  */
 import { Container, Sprite, type Renderer } from 'pixi.js';
 import { CONFIG } from './config.ts';
-import { makeCrateTexture, makeSpikeTexture, makeCoinTexture, freeTexture } from './textures.ts';
+import { makeCrateTexture, makeSpikeTexture, makeCoinTextures, freeTexture } from './textures.ts';
 import type { Rect } from './player.ts';
 import type { Stage } from './stage.ts';
 import type { ParticleSystem } from './particles.ts';
@@ -65,7 +65,7 @@ export function createSpawner(
 ): Spawner {
     const crateTex = makeCrateTexture(renderer);
     const spikeTex = makeSpikeTexture(renderer);
-    const coinTex = makeCoinTexture(renderer);
+    const coinFrames = makeCoinTextures(renderer);
 
     const obstacles: Obstacle[] = [];
     const coins: Coin[] = [];
@@ -106,7 +106,7 @@ export function createSpawner(
     };
 
     const spawnCoin = (x: number, y: number) => {
-        const s = new Sprite(coinTex);
+        const s = new Sprite(coinFrames[0]);
         s.anchor.set(0.5);
         s.width = CONFIG.coins.size;
         s.height = CONFIG.coins.size;
@@ -193,7 +193,12 @@ export function createSpawner(
                 c.sprite.x -= dx;
                 c.age += dt;
                 c.sprite.y = c.baseY + Math.sin(c.age * 4) * 8; // gentle bob
-                c.sprite.scale.x = Math.abs(Math.cos(c.age * 3)) * (c.sprite.scale.y); // spin
+                if (coinFrames.length > 1) {
+                    // spritesheet spin (random age offset desyncs the coins)
+                    c.sprite.texture = coinFrames[Math.floor(c.age * 12) % coinFrames.length];
+                } else {
+                    c.sprite.scale.x = Math.abs(Math.cos(c.age * 3)) * (c.sprite.scale.y); // fake spin
+                }
                 if (c.sprite.x < -100) {
                     c.sprite.destroy();
                     coins.splice(i, 1);
@@ -259,7 +264,7 @@ export function createSpawner(
             coins.length = 0;
             freeTexture(crateTex);
             freeTexture(spikeTex);
-            freeTexture(coinTex);
+            for (const t of coinFrames) freeTexture(t);
         },
     };
 }

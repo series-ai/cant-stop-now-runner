@@ -37,7 +37,21 @@ export const MANIFEST: Manifest = {
         {
             name: 'critical',
             assets: [
-                // e.g. { alias: 'player', src: 'images/player.png' }
+                { alias: 'crate', src: 'resources/crate.png' },
+                { alias: 'spike', src: 'resources/spike.png' },
+                // 10-frame coin spin sheet; textures.ts makeCoinTextures
+                // slices it (frame rects from resources/coin.json, baked in —
+                // Pixi force-parses any loaded .json with a 'frames' key as a
+                // spritesheet, so the json must never go through Assets).
+                { alias: 'coin-sheet', src: 'resources/coin.png' },
+                { alias: 'cloud', src: 'resources/cloud.png' },
+                { alias: 'city', src: 'resources/city_bg1.png' },
+                // hills_tile1 is hills_bg1 with the tall flat skirt below the
+                // mounds cropped off, so the mounds sit on the ground line.
+                { alias: 'hills', src: 'resources/hills_tile1.png' },
+                // ground_tile1 is ground_strip1 with its transparent top
+                // cropped off (the layer's top edge is the walking surface).
+                { alias: 'ground', src: 'resources/ground_tile1.png' },
             ],
         },
         {

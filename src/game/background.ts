@@ -7,7 +7,7 @@
  * minus the ground strip, and every layer hangs off that. Re-anchoring on
  * resize is handled here so the scene doesn't have to care.
  */
-import { Container, Sprite, TilingSprite, type Renderer, type Texture } from 'pixi.js';
+import { Assets, Container, Sprite, TilingSprite, type Renderer, type Texture } from 'pixi.js';
 import type { Stage } from './stage.ts';
 import { CONFIG } from './config.ts';
 import {
@@ -64,28 +64,47 @@ export function createBackground(renderer: Renderer, stage: Stage): Background {
     for (const seed of cloudSeeds) {
         const c = new Sprite(cloudTex);
         c.anchor.set(0.5);
-        c.scale.set(seed.s / 2); // textures are drawn at 2x
+        c.scale.set((seed.s * 260) / cloudTex.width); // display width = 260 × seed.s, any art resolution
         c.alpha = 0.9;
         c.position.set(seed.x, seed.y);
         root.addChild(c);
         clouds.push(c);
     }
 
-    const city = new TilingSprite({ texture: tileHorizontallyOnly(makeCityTexture(renderer)), width: stage.width, height: 220 });
-    city.tileScale.set(0.5);
+    // Tile scale fits the texture's height to the layer's display height, so
+    // art of any resolution works (procedural 2x placeholders resolve to 0.5).
+    // The skyline is ZOOMED, not stacked: the texture is scaled to CITY_ZOOM
+    // units tall and its bottom CITY_SINK units sink below the ground line
+    // (hidden behind ground/hills), so bigger buildings don't push the tower
+    // tips higher. The visible band is CITY_BAND tall, ending at the ground.
+    const CITY_ZOOM = 500;
+    const CITY_BAND = 300;
+    const CITY_SINK = 120;
+    const city = new TilingSprite({ texture: tileHorizontallyOnly(makeCityTexture(renderer)), width: stage.width, height: CITY_BAND });
+    city.tileScale.set(CITY_ZOOM / city.texture.height);
+    city.tilePosition.y = CITY_BAND + CITY_SINK - CITY_ZOOM;
     city.alpha = 0.75;
     root.addChild(city);
 
     const hills = new TilingSprite({ texture: tileHorizontallyOnly(makeHillsTexture(renderer)), width: stage.width, height: 160 });
-    hills.tileScale.set(0.5);
+    hills.tileScale.set(160 / hills.texture.height);
     root.addChild(hills);
 
+    // The real ground art keeps a band of grass tufts above the walking
+    // surface (top 30px of the 246px texture), so the layer extends up by
+    // that band and the tufts overlay the hills. The procedural fallback
+    // has no tuft band and sits exactly on the ground line.
+    const tuftFrac = Assets.cache.has('ground') ? 30 / 246 : 0;
+    // Raises the painted grass surface above the physics ground line so
+    // sprites standing at y = 0 look planted in the turf, not perched on it.
+    const GROUND_LIFT = Assets.cache.has('ground') ? 14 : 0;
+    const groundH = CONFIG.ground.height / (1 - tuftFrac);
     const ground = new TilingSprite({
         texture: tileHorizontallyOnly(makeGroundTexture(renderer)),
         width: stage.width,
-        height: CONFIG.ground.height,
+        height: groundH + GROUND_LIFT, // lift exposes the screen bottom; clamp fills it
     });
-    ground.tileScale.set(0.5);
+    ground.tileScale.set(groundH / ground.texture.height);
     root.addChild(ground);
 
     let groundTop = 0;
@@ -95,9 +114,9 @@ export function createBackground(renderer: Renderer, stage: Stage): Background {
         groundTop = h - CONFIG.ground.height;
         sky.width = stage.width;
         sky.height = groundTop;
-        city.y = groundTop - 220;
-        hills.y = groundTop - 160;
-        ground.y = groundTop;
+        city.y = groundTop - CITY_BAND;
+        hills.y = groundTop - 160 + 10; // lowered; the overlap hides behind the ground strip
+        ground.y = groundTop - (groundH - CONFIG.ground.height) - GROUND_LIFT;
     };
     layout();
     const offResize = stage.onResize(layout);
