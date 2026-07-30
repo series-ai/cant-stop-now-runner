@@ -109,6 +109,49 @@ function drawHat(g: Graphics, skin: Skin, w: number, h: number, H: number): void
 }
 
 /**
+ * Per-character frame rects on the 'player-sheet' image, in sheet pixels —
+ * copied from resources/character_run.json (which is reference only; Pixi
+ * force-parses any Assets-loaded .json with a 'frames' key as a spritesheet,
+ * so it must never go through the loader). Keyed by skin id.
+ */
+const CHAR_RUN_FRAMES: Record<string, [number, number, number, number]> = {
+    abyss: [29, 102, 435, 580],
+    cosmo: [528, 47, 436, 636],
+    ember: [1032, 86, 435, 597],
+    frosty: [1560, 103, 435, 579],
+    goldie: [28, 781, 436, 568],
+    lilac: [526, 814, 437, 536],
+    minty: [1039, 768, 436, 581],
+    ninja: [1534, 865, 466, 483],
+    rosie: [30, 1453, 436, 557],
+    scout: [528, 1523, 437, 487],
+    skylark: [1028, 1456, 437, 555],
+    toxo: [1553, 1451, 435, 561],
+};
+
+/**
+ * Slice one character off the 'player-sheet' image. The sprite is later
+ * forced to CONFIG.player dimensions (with hat headroom), so each frame is
+ * bottom-centered inside a virtual box of exactly that aspect ratio via
+ * trim/orig — characters keep their natural proportions, feet on the floor.
+ * Returns null when the sheet isn't loaded or the skin has no frame.
+ */
+function makeCharacterSheetTexture(skin: Skin): Texture | null {
+    const rect = CHAR_RUN_FRAMES[skin.id];
+    if (!rect || !Assets.cache.has('player-sheet')) return null;
+    const [x, y, w, h] = rect;
+    const ratio = CONFIG.player.width / (CONFIG.player.height * (1 + PLAYER_TEX_HEADROOM));
+    const boxW = Math.max(w, h * ratio);
+    const boxH = boxW / ratio;
+    return new Texture({
+        source: Assets.get<Texture>('player-sheet').source,
+        frame: new Rectangle(x, y, w, h),
+        orig: new Rectangle(0, 0, boxW, boxH),
+        trim: new Rectangle((boxW - w) / 2, boxH - h, w, h),
+    });
+}
+
+/**
  * The runner: rounded body, face, little feet, and the skin's hat. Drawn
  * facing right. The texture is (1 + PLAYER_TEX_HEADROOM) taller than the
  * body — the top band belongs to the hat.
@@ -120,6 +163,8 @@ function drawHat(g: Graphics, skin: Skin, w: number, h: number, H: number): void
  */
 export function makePlayerTexture(renderer: Renderer, skin: Skin = SKINS[0]): Texture {
     if (Assets.cache.has(`player-${skin.id}`)) return Assets.get<Texture>(`player-${skin.id}`);
+    const sheetTex = makeCharacterSheetTexture(skin);
+    if (sheetTex) return sheetTex;
     if (Assets.cache.has('player')) return Assets.get<Texture>('player');
     const w = CONFIG.player.width * SS;
     const h = CONFIG.player.height * SS;

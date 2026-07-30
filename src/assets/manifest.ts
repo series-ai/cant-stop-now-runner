@@ -37,6 +37,10 @@ export const MANIFEST: Manifest = {
         {
             name: 'critical',
             assets: [
+                // All 12 runner characters on one sheet; textures.ts
+                // makePlayerTexture slices it (frame rects from
+                // resources/character_run.json, baked in).
+                { alias: 'player-sheet', src: 'resources/character_run.png' },
                 { alias: 'crate', src: 'resources/crate.png' },
                 { alias: 'spike', src: 'resources/spike.png' },
                 // 10-frame coin spin sheet; textures.ts makeCoinTextures

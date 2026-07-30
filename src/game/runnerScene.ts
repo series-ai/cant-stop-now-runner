@@ -36,6 +36,9 @@ export function createRunnerScene(app: Application, stage: Stage): Scene {
     // anchored via the background's ground measurement, kept in sync on
     // resize (background re-lays itself out first — it subscribed first).
     const world = new Container();
+    // Sort by zIndex so the player (zIndex 1, set in player.ts) always draws
+    // in front of obstacles, which are added later but stay at zIndex 0.
+    world.sortableChildren = true;
     world.y = background.groundTopY();
     stage.root.addChild(world);
     const offResize = stage.onResize(() => { world.y = background.groundTopY(); });

@@ -64,6 +64,7 @@ export function createPlayer(
     // CONFIG.player.height (the hat pokes above, hitbox unchanged).
     sprite.height = CONFIG.player.height * (1 + PLAYER_TEX_HEADROOM);
     sprite.position.set(CONFIG.player.x, 0);
+    sprite.zIndex = 1; // render in front of obstacles (world sorts by zIndex)
     world.addChild(sprite);
 
     // Pixi Sprite width/height setters work through scale, so remember the

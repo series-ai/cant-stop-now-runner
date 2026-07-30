@@ -79,7 +79,7 @@ export function createBackground(renderer: Renderer, stage: Stage): Background {
     // tips higher. The visible band is CITY_BAND tall, ending at the ground.
     const CITY_ZOOM = 500;
     const CITY_BAND = 300;
-    const CITY_SINK = 120;
+    const CITY_SINK = 80;
     const city = new TilingSprite({ texture: tileHorizontallyOnly(makeCityTexture(renderer)), width: stage.width, height: CITY_BAND });
     city.tileScale.set(CITY_ZOOM / city.texture.height);
     city.tilePosition.y = CITY_BAND + CITY_SINK - CITY_ZOOM;
@@ -98,13 +98,16 @@ export function createBackground(renderer: Renderer, stage: Stage): Background {
     // Raises the painted grass surface above the physics ground line so
     // sprites standing at y = 0 look planted in the turf, not perched on it.
     const GROUND_LIFT = Assets.cache.has('ground') ? 14 : 0;
-    const groundH = CONFIG.ground.height / (1 - tuftFrac);
+    // Uniform scale, no edge stretching: the texture's solid part (below the
+    // tuft band) spans from the lifted grass surface to the screen bottom.
+    const solidH = CONFIG.ground.height + GROUND_LIFT;
+    const tuftH = (solidH * tuftFrac) / (1 - tuftFrac);
     const ground = new TilingSprite({
         texture: tileHorizontallyOnly(makeGroundTexture(renderer)),
         width: stage.width,
-        height: groundH + GROUND_LIFT, // lift exposes the screen bottom; clamp fills it
+        height: solidH + tuftH,
     });
-    ground.tileScale.set(groundH / ground.texture.height);
+    ground.tileScale.set((solidH + tuftH) / ground.texture.height);
     root.addChild(ground);
 
     let groundTop = 0;
@@ -116,7 +119,7 @@ export function createBackground(renderer: Renderer, stage: Stage): Background {
         sky.height = groundTop;
         city.y = groundTop - CITY_BAND;
         hills.y = groundTop - 160 + 10; // lowered; the overlap hides behind the ground strip
-        ground.y = groundTop - (groundH - CONFIG.ground.height) - GROUND_LIFT;
+        ground.y = groundTop - GROUND_LIFT - tuftH;
     };
     layout();
     const offResize = stage.onResize(layout);
