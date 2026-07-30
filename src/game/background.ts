@@ -83,7 +83,6 @@ export function createBackground(renderer: Renderer, stage: Stage): Background {
     const city = new TilingSprite({ texture: tileHorizontallyOnly(makeCityTexture(renderer)), width: stage.width, height: CITY_BAND });
     city.tileScale.set(CITY_ZOOM / city.texture.height);
     city.tilePosition.y = CITY_BAND + CITY_SINK - CITY_ZOOM;
-    city.alpha = 0.75;
     root.addChild(city);
 
     const hills = new TilingSprite({ texture: tileHorizontallyOnly(makeHillsTexture(renderer)), width: stage.width, height: 160 });
