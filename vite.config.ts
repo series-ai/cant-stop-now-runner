@@ -21,9 +21,4 @@ export default defineConfig({
         // Top-level await in the boot path (and in the SDK) needs a modern target.
         target: 'esnext',
     },
-    optimizeDeps: {
-        esbuildOptions: {
-            target: 'esnext',
-        },
-    },
 });
