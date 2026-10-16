@@ -15,6 +15,8 @@ Everything you see is a placeholder for YOUR game: the art and audio are generat
 
 ## Quick Start
 
+Requires **Node.js 20.19+ or 22.12+** (Vite 8 does not run on older versions, including Node 18). Check with `node -v`.
+
 ```bash
 npm install
 npm run dev            # http://localhost:5173 — playable immediately
