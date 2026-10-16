@@ -42,7 +42,7 @@
         "cross-env": "^7.0.3",
         "firebase": "^12.16.0",
         "tailwindcss": "^4.1.5",
-        "typescript": "^5.8.0",
+        "typescript": "^7.0.2",
         "vite": "^6.3.5"
     }
 }
