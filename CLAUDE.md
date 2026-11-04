@@ -34,7 +34,7 @@ Systems (keep, tune, or delete whole):
 - **src/audio/audio.ts** — music/sfx buses, synthesized placeholders, and
   the documented real-file swap (header comment). Volumes persist in the
   save; Settings screen edits them.
-- **src/state/save.ts** — persistence: RUN `appStorage` + localStorage
+- **src/state/save.ts** — persistence: RUN `appStorage` + `deviceCache`
   write-through, loaded once at boot (main.tsx step 2), flushed on
   onSleep/onQuit. All mutations return new state for store patching.
 - **src/systems/ads.ts + src/shared/serverTime.ts + src/sdk/ads.ts** —
